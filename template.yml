@@ -1,0 +1,236 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Example API with CORS using Serverless Application Model (SAM)
+
+Outputs:
+
+  StackRegion:
+    Value: !Ref AWS::Region
+  PeopleTableName:
+    Value: !Ref PeopleTable
+  PlacesTableName:
+    Value: !Ref PlacesTable
+
+Resources:
+
+  PeopleTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: Name
+        Type: String
+
+  PlacesTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: Name
+        Type: String
+
+  Preflight:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/cors.preflight
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Events:
+        OptionsPeople:
+          Type: Api
+          Properties:
+            Method: OPTIONS
+            Path: /people
+        OptionsPerson:
+          Type: Api
+          Properties:
+            Method: OPTIONS
+            Path: /people/{personId}
+        OptionsPlaces:
+          Type: Api
+          Properties:
+            Method: OPTIONS
+            Path: /places
+        OptionsPlace:
+          Type: Api
+          Properties:
+            Method: OPTIONS
+            Path: /places/{placeId}
+
+  CreatePerson:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/people.create
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PEOPLE_TABLE: !Ref PeopleTable
+      Events:
+        PostPeople:
+          Type: Api
+          Properties:
+            Method: POST
+            Path: /people
+
+  GetPeople:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/people.index
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PEOPLE_TABLE: !Ref PeopleTable
+      Events:
+        GetPeople:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /people
+
+  GetPerson:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/people.show
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PEOPLE_TABLE: !Ref PeopleTable
+      Events:
+        GetPerson:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /people/{personId}
+
+  UpdatePerson:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/people.update
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PEOPLE_TABLE: !Ref PeopleTable
+      Events:
+        PutPerson:
+          Type: Api
+          Properties:
+            Method: PUT
+            Path: /people/{personId}
+        PatchPerson:
+          Type: Api
+          Properties:
+            Method: PATCH
+            Path: /people/{personId}
+
+  DeletePerson:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/people.destroy
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PEOPLE_TABLE: !Ref PeopleTable
+      Events:
+        DeletePerson:
+          Type: Api
+          Properties:
+            Method: DELETE
+            Path: /people/{personId}
+
+  CreatePlace:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/places.create
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PLACES_TABLE: !Ref PlacesTable
+      Events:
+        PostPlaces:
+          Type: Api
+          Properties:
+            Method: POST
+            Path: /places
+
+  GetPlaces:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/places.index
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PLACES_TABLE: !Ref PlacesTable
+      Events:
+        GetPlaces:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /places
+
+  GetPlace:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/places.show
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PLACES_TABLE: !Ref PlacesTable
+      Events:
+        GetPlace:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /places/{placeId}
+
+  UpdatePlace:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/places.update
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PLACES_TABLE: !Ref PlacesTable
+      Events:
+        PutPlace:
+          Type: Api
+          Properties:
+            Method: PUT
+            Path: /places/{placeId}
+        PatchPlace:
+          Type: Api
+          Properties:
+            Method: PATCH
+            Path: /places/{placeId}
+
+  DeletePlace:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/places.destroy
+      Runtime: nodejs6.10
+      CodeUri: ./package/sam-cors-example.zip
+      Policies: AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          PLACES_TABLE: !Ref PlacesTable
+      Events:
+        DeletePlace:
+          Type: Api
+          Properties:
+            Method: DELETE
+            Path: /places/{placeId}
