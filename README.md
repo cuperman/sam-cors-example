@@ -1,0 +1,1 @@
+# sam-cors-example
